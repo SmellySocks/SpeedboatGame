@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT =480;
+const int SCREEN_HEIGHT = 480;
 
 int main( int argc, char* agrs[])
 {
@@ -16,7 +16,6 @@ int main( int argc, char* agrs[])
 	
 	else 
 	{
-		 //Create window 
 		 window = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN ); 
 		 if( window == NULL )
 		 {
@@ -34,4 +33,21 @@ int main( int argc, char* agrs[])
 	 SDL_Quit();
 	 return 0;
  }
-
+class Bike
+{
+	public:
+		static const int BIKE_WIDTH = 40;
+		static const int BIKE_HEIGHT = 40;
+		
+		Bike();
+		
+		void handleEvent( SDL_Event& e );
+		
+		void move();
+		
+		void render();
+		
+	private:
+		int PosX, PosY;
+		int VelX;
+};
