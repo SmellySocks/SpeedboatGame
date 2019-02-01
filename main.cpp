@@ -18,14 +18,17 @@ class Car
 		void handleEvent( SDL_Event& e );
 		int b=0;
 		void move();
-		int velocity;
+		double velocity=0;
 		void render();
-		
+		double force=0;
+		double acceleration;
 		void gearup();
+		int acc;
 		
 		void setThrottle();
 		
 		int i;
+		int vel;
 	int throttle;
 	
 	int torque = 95;
@@ -33,7 +36,7 @@ class Car
 	double radius = 0.1631;
 	int PosX, PosY;
 		int VelX;
-		double gear[6] = {0, 2.92, 1.55, 1, 0.81, 0.72};
+		double gear[5] = {2.92, 1.55, 1, 0.81, 0.72};
 		
 };
 void Car::gearup()
@@ -47,9 +50,11 @@ void Car::setThrottle()
 }
 void Car::move()
 {
-	double force = torque*final_drive*gear[b]/radius;
-	int acceleration = force/1000;
-	velocity+=acceleration/60/10;
+	force = torque*final_drive*gear[b]/radius;
+	acceleration = force/1000;
+	acc=floor(acceleration);
+	velocity+=(acceleration/60/10);
+	vel = floor(velocity);
 }
 
 int main( int argc, char* agrs[])
@@ -61,9 +66,7 @@ int main( int argc, char* agrs[])
     SDL_Renderer *renderer = NULL;
 	SDL_Texture *texture = NULL;
 	SDL_Texture *message = NULL;
-	surfaceMessage = TTF_RenderText_Solid(Sans, currgear, White);
-	message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
-	SDL_Rect Gear_rect;
+	SDL_Rect Gear_Rect;
 	Gear_Rect.x=0;
 	Gear_Rect.y=0;
 	Gear_Rect.w=100;
@@ -72,7 +75,6 @@ int main( int argc, char* agrs[])
 	SDL_Init (SDL_INIT_EVERYTHING );
 	Car hyundai;
 	int speed = 5;
-	SDL_Rect imgloc = {120, 394, 40, 40};
 	SDL_Rect camera;
     camera.x = 0; //Don't worry about this camera, I need this after i get the background working.
     camera.y = 0;
@@ -113,7 +115,6 @@ int main( int argc, char* agrs[])
 				SDL_ShowSimpleMessageBox(0, "Texture init error", SDL_GetError(), window);
 			}
 				SDL_RenderCopy(renderer, texture, &camera, NULL);
-				SDL_RenderCopy(renderer, Message, NULL, &Message_Rect);
 				SDL_RenderPresent(renderer);
 		}
 	 }
@@ -140,14 +141,19 @@ int main( int argc, char* agrs[])
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym)
                 {
-                case SDLK_RIGHT:
+                /*case SDLK_RIGHT:
                     b[0]=1;
-                    break;
+                    break;*/
                 case SDLK_LEFT:
                     b[1]=1;
                     break;
 				case SDLK_d:
+				b[0]=1;
 					hyundai.gearup();
+					hyundai.setThrottle();
+					cout << hyundai.b;
+					cout << "force: " << hyundai.force<<endl;
+					cout << "vel: " << hyundai.vel<<endl;
                 }
                 break;
             case SDL_KEYUP:
@@ -162,9 +168,10 @@ int main( int argc, char* agrs[])
                 }
                 break;
             }
-            if(b[0])
+            if(b[0]==1)
         {
-			speed=floor(hyundai.velocity);
+			hyundai.move();
+			speed=hyundai.vel;
             x+=speed;
             camera.x += speed;
             if(camera.x >=4200-640)
@@ -176,6 +183,7 @@ int main( int argc, char* agrs[])
             x-=speed;
             camera.x-=speed;
         }
+			
          SDL_RenderCopy(renderer, texture, &camera, NULL);
         SDL_BlitSurface(background, &camera, screen, NULL);
         SDL_RenderPresent(renderer);
