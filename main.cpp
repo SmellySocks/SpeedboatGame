@@ -3,12 +3,13 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <math.h>
 
 using namespace std;
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int fps = 20;
+const int fps = 100;
 class Car
 {
 	public:
@@ -20,19 +21,22 @@ class Car
 		void move();
 		double velocity=0;
 		void render();
-		double force=0;
+		double force;
 		double acceleration;
 		void gearup();
 		int acc;
-		
+		int torque_curve[14] = {15, 20, 58, 80, 100, 107, 113, 117, 120, 117, 112, 107, 99, 79 };   
 		void setThrottle();
-		
+		int torque_index;
 		int i;
 		int vel;
 	int throttle;
-	
-	int torque = 95;
-	int final_drive = 4.44;
+	int engine_rpm;
+	int rpm_ratio;
+	double wheel_rpm;
+	int base_torque = 95;
+	double torque;
+	double final_drive = 4.44;
 	double radius = 0.1631;
 	int PosX, PosY;
 		int VelX;
@@ -41,36 +45,48 @@ class Car
 };
 void Car::gearup()
 {
-	if(b<6)
+	if(b<5)
 		b++;
 }
 void Car::setThrottle()
 {
 	throttle=1;
+	
 }
 void Car::move()
 {
-	force = throttle*torque*final_drive*gear[b]/radius;
+	wheel_rpm = floor((velocity+1)/(2*M_PI*radius/60));
+	engine_rpm = floor(wheel_rpm*gear[b]*final_drive);
+	if (engine_rpm>6500)
+    engine_rpm=6500;
+    if (engine_rpm <1000)
+	engine_rpm = 1000;
+    torque_index = floor(engine_rpm/500);
+	torque = torque_curve[torque_index]*gear[b]*final_drive;
+	force = throttle*torque/(2*radius);
 	acceleration = force/1080;
 	acc=floor(acceleration);
-	velocity+=(acceleration);
+	velocity+=(acceleration*0.016);
 	vel = floor(velocity);
+	
+	
 }
 
 int main( int argc, char* agrs[])
 {
 	SDL_Window* window = NULL;
 	SDL_Surface *background = NULL;
+	SDL_Surface *car = NULL;
 	SDL_Surface *screen = NULL;
-	SDL_Surface* surfaceMessage = NULL;
     SDL_Renderer *renderer = NULL;
 	SDL_Texture *texture = NULL;
+	SDL_Texture *carTexture = NULL;
 	SDL_Texture *message = NULL;
-	SDL_Rect Gear_Rect;
-	Gear_Rect.x=0;
-	Gear_Rect.y=0;
-	Gear_Rect.w=100;
-	Gear_Rect.h=100;
+	SDL_Rect Car_Rect;
+	Gear_Rect.x=15;
+	Gear_Rect.y=440;
+	Gear_Rect.w=40;
+	Gear_Rect.h=40;
 	
 	SDL_Init (SDL_INIT_EVERYTHING );
 	Car hyundai;
@@ -99,7 +115,7 @@ int main( int argc, char* agrs[])
 		 else
 		 {
 			background = SDL_LoadBMP("background.bmp");
-			
+			car = SDL_LoadBMP("hyundai.bmp");
 			if(background == NULL)
 			{
 				SDL_ShowSimpleMessageBox(0, "Background init error",         SDL_GetError(), window);
@@ -118,6 +134,7 @@ int main( int argc, char* agrs[])
 				SDL_RenderPresent(renderer);
 		}
 	 }
+	 
 	bool move = false;
     int curr_gear=0;
     bool running = true;
@@ -146,7 +163,6 @@ int main( int argc, char* agrs[])
                 {
                 case SDLK_RIGHT:
                     move=true;
-                    hyundai.setThrottle();
                     break;
                 case SDLK_LEFT:
                     b[1]=1;
@@ -157,6 +173,7 @@ int main( int argc, char* agrs[])
 					cout << hyundai.b;
 					cout << "force: " << hyundai.force<<endl;
 					cout << "vel: " << hyundai.velocity<<endl;
+					cout << "torque: " << hyundai.torque<<endl;
 					break;
                 }
                 break;
@@ -179,9 +196,11 @@ int main( int argc, char* agrs[])
             SDL_Delay(1000/fps-(SDL_GetTicks() - start));  
           if(move)
         {
+            hyundai.setThrottle();
 			hyundai.move();
-			speed=hyundai.vel;
-            camera.x += speed;
+			if(hyundai.vel >=0)
+			speed=hyundai.vel*10/60;
+            camera.x += floor(speed);
             //cout<<camera.x<<endl;
             if(camera.x >=4200-640)
 				camera.x=4200-640;	
@@ -189,12 +208,16 @@ int main( int argc, char* agrs[])
         
         else if(move==false)
         {
-			speed=floor(hyundai.velocity);
+			speed=floor(hyundai.velocity*10);
             x-=speed;
             camera.x-=speed;
         }
 	}
-        cout<<camera.x<<endl;
+        cout<<"revs: "<<hyundai.engine_rpm<<endl;
+        cout<<"speed: "<<hyundai.vel*3.6<<endl;
+        cout<<"gear: "<<hyundai.b<<endl;
+        cout<<"torque: "<<hyundai.torque<<endl;
+        SDL_BlitSurface(background, &camera, screen, NULL);
         SDL_BlitSurface(background, &camera, screen, NULL);
         SDL_RenderCopy(renderer, texture, &camera, NULL);
         SDL_RenderPresent(renderer);
@@ -202,9 +225,7 @@ int main( int argc, char* agrs[])
         
 	 
  }
- /*SDL_FreeSurface(background);
- SDL_FreeSurface(screen);
- SDL_Quit();*/
+ SDL_Quit();
  return 0;
 }
 
