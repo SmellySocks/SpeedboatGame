@@ -8,7 +8,7 @@ using namespace std;
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const int fps = 60;
+const int fps = 20;
 class Car
 {
 	public:
@@ -36,12 +36,12 @@ class Car
 	double radius = 0.1631;
 	int PosX, PosY;
 		int VelX;
-		double gear[5] = {2.92, 1.55, 1, 0.81, 0.72};
+		double gear[6] = {0, 2.92, 1.55, 1, 0.81, 0.72};
 		
 };
 void Car::gearup()
 {
-	if(b<=5)
+	if(b<6)
 		b++;
 }
 void Car::setThrottle()
@@ -50,10 +50,10 @@ void Car::setThrottle()
 }
 void Car::move()
 {
-	force = torque*final_drive*gear[b]/radius;
-	acceleration = force/1000;
+	force = throttle*torque*final_drive*gear[b]/radius;
+	acceleration = force/1080;
 	acc=floor(acceleration);
-	velocity+=(acceleration/60/10);
+	velocity+=(acceleration);
 	vel = floor(velocity);
 }
 
@@ -74,7 +74,7 @@ int main( int argc, char* agrs[])
 	
 	SDL_Init (SDL_INIT_EVERYTHING );
 	Car hyundai;
-	int speed = 5;
+	int speed = 0;
 	SDL_Rect camera;
     camera.x = 0; //Don't worry about this camera, I need this after i get the background working.
     camera.y = 0;
@@ -118,20 +118,23 @@ int main( int argc, char* agrs[])
 				SDL_RenderPresent(renderer);
 		}
 	 }
-	 
+	bool move = false;
     int curr_gear=0;
     bool running = true;
-    while (true)
+    while (running)
     {
         start = SDL_GetTicks();
         SDL_Event event;
+        
 
-        while(SDL_WaitEvent(&event))
+        while(SDL_PollEvent(&event))
         {
             switch(event.type)
             {
             case SDL_QUIT:
                 running = false;
+                cout<<"terminting"<<endl;
+                SDL_DestroyTexture(texture);
                 SDL_DestroyTexture(texture);
                 SDL_FreeSurface(background);
                 SDL_DestroyRenderer(renderer);
@@ -141,25 +144,26 @@ int main( int argc, char* agrs[])
             case SDL_KEYDOWN:
                 switch(event.key.keysym.sym)
                 {
-                /*case SDLK_RIGHT:
-                    b[0]=1;
-                    break;*/
+                case SDLK_RIGHT:
+                    move=true;
+                    hyundai.setThrottle();
+                    break;
                 case SDLK_LEFT:
                     b[1]=1;
                     break;
 				case SDLK_d:
-				b[0]=1;
 					hyundai.gearup();
-					hyundai.setThrottle();
+					hyundai.move();
 					cout << hyundai.b;
 					cout << "force: " << hyundai.force<<endl;
-					cout << "vel: " << hyundai.vel<<endl;
+					cout << "vel: " << hyundai.velocity<<endl;
+					break;
                 }
                 break;
             case SDL_KEYUP:
                 switch(event.key.keysym.sym)
                 {
-                case SDLK_UP:
+                case SDLK_RIGHT:
                     b[0]=0;
                     break;
                 case SDLK_LEFT:
@@ -168,33 +172,39 @@ int main( int argc, char* agrs[])
                 }
                 break;
             }
-            if(b[0]==1)
+            
+          }
+          if(1000/fps>SDL_GetTicks()-start)
+        {
+            SDL_Delay(1000/fps-(SDL_GetTicks() - start));  
+          if(move)
         {
 			hyundai.move();
 			speed=hyundai.vel;
-            x+=speed;
             camera.x += speed;
+            //cout<<camera.x<<endl;
             if(camera.x >=4200-640)
-				camera.x=4200-640;
+				camera.x=4200-640;	
         }
-        else if(b[1])
+        
+        else if(move==false)
         {
 			speed=floor(hyundai.velocity);
             x-=speed;
             camera.x-=speed;
         }
-			
-         SDL_RenderCopy(renderer, texture, &camera, NULL);
+	}
+        cout<<camera.x<<endl;
         SDL_BlitSurface(background, &camera, screen, NULL);
+        SDL_RenderCopy(renderer, texture, &camera, NULL);
         SDL_RenderPresent(renderer);
         
-        if(1000/fps>SDL_GetTicks()-start)
-        {
-            SDL_Delay(1000/fps-(SDL_GetTicks() - start));
-        }
-     }
         
-	 return 0;
+	 
  }
+ /*SDL_FreeSurface(background);
+ SDL_FreeSurface(screen);
+ SDL_Quit();*/
+ return 0;
 }
 
