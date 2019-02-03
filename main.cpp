@@ -76,17 +76,17 @@ int main( int argc, char* agrs[])
 {
 	SDL_Window* window = NULL;
 	SDL_Surface *background = NULL;
-	SDL_Surface *car = NULL;
+	SDL_Surface *vehicle = NULL;
 	SDL_Surface *screen = NULL;
     SDL_Renderer *renderer = NULL;
 	SDL_Texture *texture = NULL;
 	SDL_Texture *carTexture = NULL;
 	SDL_Texture *message = NULL;
-	SDL_Rect Car_Rect;
-	Gear_Rect.x=15;
-	Gear_Rect.y=440;
-	Gear_Rect.w=40;
-	Gear_Rect.h=40;
+	SDL_Rect CarRect;
+	CarRect.x=15;
+	CarRect.y=440;
+	CarRect.w=40;
+	CarRect.h=40;
 	
 	SDL_Init (SDL_INIT_EVERYTHING );
 	Car hyundai;
@@ -106,7 +106,7 @@ int main( int argc, char* agrs[])
 	
 	else 
 	{
-		 window = SDL_CreateWindow( "1/4 Mile Race", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		 window = SDL_CreateWindow( "1/4 Mile sim", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		 
 		 if( window == NULL )
 		 {
@@ -115,7 +115,7 @@ int main( int argc, char* agrs[])
 		 else
 		 {
 			background = SDL_LoadBMP("background.bmp");
-			car = SDL_LoadBMP("hyundai.bmp");
+			vehicle = SDL_LoadBMP("Hyundai.bmp");
 			if(background == NULL)
 			{
 				SDL_ShowSimpleMessageBox(0, "Background init error",         SDL_GetError(), window);
@@ -126,11 +126,13 @@ int main( int argc, char* agrs[])
 				SDL_ShowSimpleMessageBox(0, "Renderer init error", SDL_GetError(), window);
 			}
 			texture = SDL_CreateTextureFromSurface(renderer,background);
+			carTexture = SDL_CreateTextureFromSurface(renderer,vehicle);
 			if(texture == NULL)
 			{
 				SDL_ShowSimpleMessageBox(0, "Texture init error", SDL_GetError(), window);
 			}
 				SDL_RenderCopy(renderer, texture, &camera, NULL);
+				SDL_RenderCopy(renderer, carTexture, &CarRect, NULL);
 				SDL_RenderPresent(renderer);
 		}
 	 }
@@ -203,7 +205,9 @@ int main( int argc, char* agrs[])
             camera.x += floor(speed);
             //cout<<camera.x<<endl;
             if(camera.x >=4200-640)
+            {
 				camera.x=4200-640;	
+				hyundai.throttle = 0;
         }
         
         else if(move==false)
@@ -217,12 +221,13 @@ int main( int argc, char* agrs[])
         cout<<"speed: "<<hyundai.vel*3.6<<endl;
         cout<<"gear: "<<hyundai.b<<endl;
         cout<<"torque: "<<hyundai.torque<<endl;
+        SDL_BlitSurface(vehicle, NULL, screen, &CarRect);
         SDL_BlitSurface(background, &camera, screen, NULL);
-        SDL_BlitSurface(background, &camera, screen, NULL);
+        
         SDL_RenderCopy(renderer, texture, &camera, NULL);
         SDL_RenderPresent(renderer);
         
-        
+	}
 	 
  }
  SDL_Quit();
