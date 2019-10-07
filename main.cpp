@@ -106,7 +106,7 @@ int main( int argc, char* agrs[])
 	
 	else 
 	{
-		 window = SDL_CreateWindow( "1/4 Mile sim", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		 window = SDL_CreateWindow( "1/4 Mile race simulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		 
 		 if( window == NULL )
 		 {
@@ -174,7 +174,7 @@ int main( int argc, char* agrs[])
 					hyundai.move();
 					cout << hyundai.b;
 					cout << "force: " << hyundai.force<<endl;
-					cout << "vel: " << hyundai.velocity<<endl;
+					cout << "velocity: " << hyundai.velocity<<endl;
 					cout << "torque: " << hyundai.torque<<endl;
 					break;
                 }
