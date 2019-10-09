@@ -152,7 +152,7 @@ int main( int argc, char* agrs[])
             {
             case SDL_QUIT:
                 running = false;
-                cout<<"terminting"<<endl;
+                cout<<"terminating"<<endl;
                 SDL_DestroyTexture(texture);
                 SDL_DestroyTexture(texture);
                 SDL_FreeSurface(background);
