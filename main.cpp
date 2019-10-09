@@ -203,7 +203,7 @@ int main( int argc, char* agrs[])
 			if(hyundai.vel >=0)
 			speed=hyundai.vel*10/60;
             camera.x += floor(speed);
-            //cout<<camera.x<<endl;
+            cout<<camera.x<<endl;
             if(camera.x >=4200-640)
             {
 				camera.x=4200-640;	
